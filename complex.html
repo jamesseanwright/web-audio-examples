@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Complex Web Audio API Example</title>
+    </head>
+    <body></body>
+    <script>
+        'use strict';
+
+        const fetchAsAudioBuffer = async (url, audioContext) => {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(arrayBuffer);
+        };
+
+        (async () => {
+            const context = new AudioContext();
+            const oscillator = context.createOscillator();
+            const bufferSource = context.createBufferSource();
+            const gain = context.createGain();
+            const stereoPanner = context.createStereoPanner();
+
+            const getTime = time => context.currentTime + time;
+
+            oscillator.frequency.value = 300;
+            bufferSource.buffer = await fetchAsAudioBuffer('/yodel.mp3', context);
+            gain.gain.value = 0.2;
+            stereoPanner.pan.value = -0.3;
+
+            oscillator.connect(gain);
+            gain.connect(stereoPanner);
+            bufferSource.connect(stereoPanner);
+            stereoPanner.connect(context.destination);
+
+            document.onclick = () => {
+                context.resume();
+                bufferSource.start();
+                oscillator.start();
+                oscillator.stop(getTime(4));
+            };
+        })();
+    </script>
+</html>

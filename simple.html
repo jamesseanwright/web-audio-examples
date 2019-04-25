@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Simple Web Audio API Example</title>
+    </head>
+    <body></body>
+    <script>
+        'use strict';
+
+        const context = new AudioContext();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const stereoPanner = context.createStereoPanner();
+        const getTime = time => context.currentTime + time;
+
+        oscillator.type = 'square';
+        oscillator.frequency.value = 200;
+        oscillator.frequency.exponentialRampToValueAtTime(800, getTime(3));
+        gain.gain.value = 0.2;
+        stereoPanner.pan.value = -0.2
+
+        oscillator.connect(gain);
+        gain.connect(stereoPanner);
+        stereoPanner.connect(context.destination);
+
+        document.onclick = () => {
+            context.resume();
+            oscillator.start();
+            oscillator.stop(getTime(3));
+        };
+    </script>
+</html>
